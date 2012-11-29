@@ -1,0 +1,9 @@
+.DS_Store*
+.svn*
+.project
+.buildpath
+.settings
+ehthumbs.db
+Icon?
+Thumbs.db
+log.txt
