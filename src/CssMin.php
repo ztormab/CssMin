@@ -5080,10 +5080,15 @@ class CssAtCharsetParserPlugin extends aCssParserPlugin
 }
 
 /**
- * CssUrlPrefixMinifierPlugin 
- * Originaly authored by André Fiedler <http://code.google.com/u/116509237159086833815/>
- * Uploaded here to CssMin Google Code Issues tracker <http://code.google.com/p/cssmin/issues/detail?id=30>
- * Some updates made by Ztorm AB <http://www.ztorm.com/>
+ * {@link aCssMinifierPlugin} for parsing url()s and changing dynamic links to full path.
+ * Uploaded to CssMin Google Code Issues tracker <http://code.google.com/p/cssmin/issues/detail?id=30>
+ * Some updates made by Ztorm AB <https://github.com/ztormab/CssMin>
+ *
+ * @package		CssMin/Minifier/Plugins
+ * @link		http://code.google.com/p/cssmin/
+ * @author		AndrÃ© Fiedler <http://code.google.com/u/116509237159086833815/>
+ * @author		Ztorm AB <https://github.com/ztormab/CssMin>
+ * @version		1.0.0
  */
 class CssUrlPrefixMinifierPlugin extends aCssMinifierPlugin {
 
