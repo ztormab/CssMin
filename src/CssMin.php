@@ -5079,4 +5079,103 @@ class CssAtCharsetParserPlugin extends aCssParserPlugin
 	}
 }
 
-?>
+/**
+ * CssUrlPrefixMinifierPlugin 
+ * Originaly authored by André Fiedler <http://code.google.com/u/116509237159086833815/>
+ * Uploaded here to CssMin Google Code Issues tracker <http://code.google.com/p/cssmin/issues/detail?id=30>
+ * Some updates made by Ztorm AB <http://www.ztorm.com/>
+ */
+class CssUrlPrefixMinifierPlugin extends aCssMinifierPlugin {
+
+	/**
+	 * Regular expression matching the value.
+	 * 
+	 * @var string
+	 */
+	private $reMatch = "/url\s*\(\s*([^\)]+)\)/iS";
+
+	/**
+	 * Implements {@link aCssMinifierPlugin::minify()}.
+	 * 
+	 * @param aCssToken $token Token to process
+	 * @return boolean Return TRUE to break the processing of this token; FALSE to continue
+	 */
+	public function apply(aCssToken &$token) {
+		if (get_class($token) === "CssRulesetDeclarationToken" && stripos($token->Value, "url") !== false) {
+			preg_match_all($this->reMatch, $token->Value, $m);
+			if (!empty($m)) {
+				foreach ($m[1] AS $index => $src) {
+					$token->Value = str_replace($src, $this->urlPrefix($src), $token->Value);
+				}
+			}
+		}
+		return false;
+	}
+		
+	/**
+	 * Implements {@link aMinifierPlugin::getTriggerTokens()}
+	 * 
+	 * @return array
+	 */
+	public function getTriggerTokens()
+	{
+		return array(
+			"CssRulesetDeclarationToken"
+		);
+	}
+
+	private function urlPrefix($url) {
+		$url = str_replace('"', "", $url);
+		$url = str_replace('\'', "", $url);
+		
+		return "'" . $this->resolveHref($this->configuration["BaseUrl"], $url) . "'";
+	}
+	
+	function resolveHref($base, $href) {
+
+		// href="" ==> current url.
+		if (!$href) {
+			return $base;
+		}
+
+		// href="http://..." ==> href isn't relative
+		$rel_parsed = parse_url($href);
+		if (array_key_exists('scheme', $rel_parsed)) {
+			return $href;
+		}
+
+		// add an extra character so that, if it ends in a /, we don't lose the last piece.
+		$base_parsed = parse_url("$base ");
+		// if it's just server.com and no path, then put a / there.
+		if (!array_key_exists('path', $base_parsed)) {
+			$base_parsed = parse_url("$base/ ");
+		}
+
+		// href="/ ==> throw away current path.
+		if ($href{0} === "/") {
+			$path = $href;
+		} else {
+			$path = dirname($base_parsed['path']) . "/$href";
+		}
+
+		// bla/./bloo ==> bla/bloo
+		$path = preg_replace('~/\./~', '/', $path);
+
+		// resolve /../
+		// loop through all the parts, popping whenever there's a .., pushing otherwise.
+		$parts = array();
+		foreach (
+		explode('/', preg_replace('~/+~', '/', $path)) as $part
+		)
+			if ($part === "..") {
+				array_pop($parts);
+			} elseif ($part != "") {
+				$parts[] = $part;
+			}
+
+		return (
+		(array_key_exists('scheme', $base_parsed)) ?
+				$base_parsed['scheme'] . '://' . $base_parsed['host'] : ""
+		) . "/" . implode("/", $parts);
+	}
+}
