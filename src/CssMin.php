@@ -5106,7 +5106,7 @@ class CssUrlPrefixMinifierPlugin extends aCssMinifierPlugin {
 	 * @return boolean Return TRUE to break the processing of this token; FALSE to continue
 	 */
 	public function apply(aCssToken &$token) {
-		if (get_class($token) === "CssRulesetDeclarationToken" && stripos($token->Value, "url") !== false) {
+		if (in_array(get_class($token), $this->getTriggerTokens()) && stripos($token->Value, "url") !== false) {
 			preg_match_all($this->reMatch, $token->Value, $m);
 			if (!empty($m)) {
 				foreach ($m[1] AS $index => $src) {
@@ -5125,7 +5125,8 @@ class CssUrlPrefixMinifierPlugin extends aCssMinifierPlugin {
 	public function getTriggerTokens()
 	{
 		return array(
-			"CssRulesetDeclarationToken"
+			"CssRulesetDeclarationToken",
+			"CssAtFontFaceDeclarationToken"
 		);
 	}
 
